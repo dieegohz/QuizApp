@@ -1538,10 +1538,10 @@
       // If correct_answer matches single option text exactly → single
       if (question.options.includes(ca)) return false;
       // If correct_answer is like "A" or "B" (single letter) → single
-      if (/^[A-D]$/.test(ca.trim())) return false;
+      if (/^[A-H]$/.test(ca.trim())) return false;
       // If it contains comma/semicolon or multiple capital letters separated → multi
       if (/[,;]/.test(ca)) return true;
-      if (/\b[A-D]\b.+\b[A-D]\b/.test(ca)) return true;
+      if (/\b[A-H]\b.+\b[A-H]\b/.test(ca)) return true;
       return false;
     }
 
@@ -1552,11 +1552,11 @@
       const exactIdx = question.options.indexOf(ca);
       if (exactIdx !== -1) return new Set([exactIdx]);
       // Single letter match: "A", "B", etc.
-      if (/^[A-D]$/i.test(ca.trim())) {
+      if (/^[A-H]$/i.test(ca.trim())) {
         return new Set([ca.trim().toUpperCase().charCodeAt(0) - 65]);
       }
-      // Multi: extract all A-D letters from the answer string
-      const letters = [...ca.matchAll(/\b([A-D])\b/gi)].map(m => m[1].toUpperCase());
+      // Multi: extract all A-H letters from the answer string
+      const letters = [...ca.matchAll(/\b([A-H])\b/gi)].map(m => m[1].toUpperCase());
       if (letters.length > 0) return new Set(letters.map(l => l.charCodeAt(0) - 65));
       // Fallback: try matching option text
       const result = new Set();
@@ -1747,33 +1747,33 @@
     }
 
     function showResults() {
-  // Auto-evaluate any unchecked questions
-  const q = state.quiz;
-  const prevCurrent = q.current;
-  q.questionStates.forEach((qs, i) => {
-    if (qs.checked) return;
-    q.current = i;
-    const question = q.questions[i];
-    const correctIdxs = getCorrectIndices(question);
-    const selectedArr = [...qs.selectedIdxs].sort().join(',');
-    const correctArr = [...correctIdxs].sort().join(',');
-    qs.correct = selectedArr === correctArr;
-    qs.checked = true;
-    if (!qs.correct) {
-      const key = `${q.setName}::${question.id}`;
-      const selectedLabels = [...qs.selectedIdxs].map(idx => String.fromCharCode(65 + idx)).join(', ');
-      const correctLabels = [...correctIdxs].map(idx => String.fromCharCode(65 + idx)).join(', ');
-      if (!state.failed[key]) {
-        state.failed[key] = { question: question.question, correct_answer: question.correct_answer, options: question.options, explanation: question.explanation || '', setName: q.setName, failCount: 0 };
-      }
-      state.failed[key].wrongAnswer = `${selectedLabels} (correcta: ${correctLabels})`;
-      state.failed[key].explanation = question.explanation || '';
-      state.failed[key].failCount = (state.failed[key].failCount || 0) + 1;
-      state.failed[key].lastFailed = new Date().toISOString();
-    }
-  });
-  q.current = prevCurrent;
-// q already defined above
+      // Auto-evaluate any unchecked questions
+      const q = state.quiz;
+      const prevCurrent = q.current;
+      q.questionStates.forEach((qs, i) => {
+        if (qs.checked) return;
+        q.current = i;
+        const question = q.questions[i];
+        const correctIdxs = getCorrectIndices(question);
+        const selectedArr = [...qs.selectedIdxs].sort().join(',');
+        const correctArr = [...correctIdxs].sort().join(',');
+        qs.correct = selectedArr === correctArr;
+        qs.checked = true;
+        if (!qs.correct) {
+          const key = `${q.setName}::${question.id}`;
+          const selectedLabels = [...qs.selectedIdxs].map(idx => String.fromCharCode(65 + idx)).join(', ');
+          const correctLabels = [...correctIdxs].map(idx => String.fromCharCode(65 + idx)).join(', ');
+          if (!state.failed[key]) {
+            state.failed[key] = { question: question.question, correct_answer: question.correct_answer, options: question.options, explanation: question.explanation || '', setName: q.setName, failCount: 0 };
+          }
+          state.failed[key].wrongAnswer = `${selectedLabels} (correcta: ${correctLabels})`;
+          state.failed[key].explanation = question.explanation || '';
+          state.failed[key].failCount = (state.failed[key].failCount || 0) + 1;
+          state.failed[key].lastFailed = new Date().toISOString();
+        }
+      });
+      q.current = prevCurrent;
+      // q already defined above
       const total = q.questions.length;
       const checked = q.questionStates.filter(s => s.checked).length;
       const correct = q.questionStates.filter(s => s.correct === true).length;
